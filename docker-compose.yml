@@ -1,0 +1,104 @@
+services:
+  web:
+    image: jitsi/web:stable-9location823
+    restart: unless-stopped
+    volumes:
+      - ${CONFIG:-~/.jitsi-meet-cfg}/web:/config:Z
+      - ${CONFIG:-~/.jitsi-meet-cfg}/web/crontabs:/var/spool/cron/crontabs:Z
+      - ${CONFIG:-~/.jitsi-meet-cfg}/transcripts:/usr/share/jitsi-meet/transcripts:Z
+      - ./custom/interface_config.js:/usr/share/jitsi-meet/interface_config.js:ro
+      - ./custom/custom.css:/usr/share/jitsi-meet/css/custom.css:ro
+    environment:
+      - PUBLIC_URL=https://meet.artellico.com
+      - TZ=Europe/Vienna
+      - ENABLE_LETSENCRYPT=0
+      - ENABLE_AUTH
+      - AUTH_TYPE
+      - ENABLE_GUESTS
+      - ENABLE_LOBBY
+    networks:
+      meet.jitsi:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jitsi.rule=Host(`meet.artellico.com`)"
+      - "traefik.http.routers.jitsi.entrypoints=https"
+      - "traefik.http.routers.jitsi.tls=true"
+      - "traefik.http.routers.jitsi.tls.certresolver=letsencrypt"
+      - "traefik.http.services.jitsi.loadbalancer.server.port=80"
+
+  prosody:
+    image: jitsi/prosody:stable-9823
+    restart: unless-stopped
+    expose:
+      - '5222'
+      - '5347'
+      - '5280'
+    volumes:
+      - ${CONFIG:-~/.jitsi-meet-cfg}/prosody/config:/config:Z
+      - ${CONFIG:-~/.jitsi-meet-cfg}/prosody/prosody-plugins-custom:/prosody-plugins-custom:Z
+    environment:
+      - AUTH_TYPE=internal
+      - ENABLE_AUTH=1
+      - ENABLE_GUESTS=1
+      - ENABLE_LOBBY=1
+      - PUBLIC_URL=https://meet.artellico.com
+      - TZ=Europe/Vienna
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+      - JIGASI_XMPP_PASSWORD=${JIGASI_XMPP_PASSWORD}
+      - JIBRI_RECORDER_PASSWORD=${JIBRI_RECORDER_PASSWORD}
+      - JIBRI_XMPP_PASSWORD=${JIBRI_XMPP_PASSWORD}
+      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
+    networks:
+      meet.jitsi:
+        aliases:
+          - xmpp.meet.jitsi
+
+  jicofo:
+    image: jitsi/jicofo:stable-9823
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    volumes:
+      - ${CONFIG:-~/.jitsi-meet-cfg}/jicofo:/config:Z
+    environment:
+      - AUTH_TYPE=internal
+      - ENABLE_AUTH=1
+      - TZ=Europe/Vienna
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
+      - ENABLE_LOBBY=1
+    depends_on:
+      - prosody
+    networks:
+      meet.jitsi:
+
+  jvb:
+    image: jitsi/jvb:stable-9823
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    ports:
+      - '${JVB_PORT:-10000}:${JVB_PORT:-10000}/udp'
+    volumes:
+      - ${CONFIG:-~/.jitsi-meet-cfg}/jvb:/config:Z
+    environment:
+      - JVB_ADVERTISE_IPS=${JVB_ADVERTISE_IPS}
+      - JVB_PORT=${JVB_PORT:-10000}
+      - JVB_STUN_SERVERS=stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302
+      - PUBLIC_URL=https://meet.artellico.com
+      - TZ=Europe/Vienna
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+      - COLIBRI_REST_ENABLED=true
+    depends_on:
+      - prosody
+    networks:
+      meet.jitsi:
+
+networks:
+  meet.jitsi:
+    driver: bridge

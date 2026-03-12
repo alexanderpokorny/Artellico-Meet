@@ -1,0 +1,29 @@
+/* Artellico Meet - Custom Branding CSS */
+:root {
+    --oknav: #1a365d;
+    --oknav-hover: #2a4a7f;
+}
+
+/* Welcome page branding */
+.welcome .header {
+    background: var(--oknav) !important;
+}
+
+.welcome .oknav-container {
+    background: var(--oknav) !important;
+}
+
+/* Toolbar branding */
+.new-toolbox .toolbox-background {
+    background: linear-gradient(to top, rgba(26, 54, 93, 0.8), transparent) !important;
+}
+
+/* Header strip */
+.oknav-strip {
+    background-color: var(--oknav) !important;
+}
+
+/* Lobby page */
+.oknav-room {
+    background: var(--oknav) !important;
+}
