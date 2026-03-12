@@ -1,6 +1,6 @@
 services:
   web:
-    image: jitsi/web:stable-9location823
+    image: jitsi/web:stable
     restart: unless-stopped
     volumes:
       - ${CONFIG:-~/.jitsi-meet-cfg}/web:/config:Z
@@ -18,6 +18,7 @@ services:
       - ENABLE_LOBBY
     networks:
       meet.jitsi:
+      coolify:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jitsi.rule=Host(`meet.artellico.com`)"
@@ -25,9 +26,12 @@ services:
       - "traefik.http.routers.jitsi.tls=true"
       - "traefik.http.routers.jitsi.tls.certresolver=letsencrypt"
       - "traefik.http.services.jitsi.loadbalancer.server.port=80"
+      - "traefik.http.routers.jitsi-http.rule=Host(`meet.artellico.com`)"
+      - "traefik.http.routers.jitsi-http.entrypoints=http"
+      - "traefik.http.routers.jitsi-http.middlewares=redirect-to-https"
 
   prosody:
-    image: jitsi/prosody:stable-9823
+    image: jitsi/prosody:stable
     restart: unless-stopped
     expose:
       - '5222'
@@ -55,7 +59,7 @@ services:
           - xmpp.meet.jitsi
 
   jicofo:
-    image: jitsi/jicofo:stable-9823
+    image: jitsi/jicofo:stable
     restart: unless-stopped
     deploy:
       resources:
@@ -76,7 +80,7 @@ services:
       meet.jitsi:
 
   jvb:
-    image: jitsi/jvb:stable-9823
+    image: jitsi/jvb:stable
     restart: unless-stopped
     deploy:
       resources:
@@ -102,3 +106,5 @@ services:
 networks:
   meet.jitsi:
     driver: bridge
+  coolify:
+    external: true
