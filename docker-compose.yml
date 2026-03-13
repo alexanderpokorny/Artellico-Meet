@@ -15,7 +15,7 @@ services:
       - ENABLE_GUESTS=${ENABLE_GUESTS:-1}
       - ENABLE_LOBBY=${ENABLE_LOBBY:-1}
     networks:
-      meet.jitsi:
+      jitsi:
       coolify:
     labels:
       - "traefik.enable=true"
@@ -53,7 +53,7 @@ services:
       - JIBRI_XMPP_PASSWORD=${JIBRI_XMPP_PASSWORD}
       - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
     networks:
-      meet.jitsi:
+      jitsi:
         aliases:
           - xmpp.meet.jitsi
 
@@ -76,7 +76,7 @@ services:
     depends_on:
       - prosody
     networks:
-      meet.jitsi:
+      jitsi:
 
   jvb:
     image: jitsi/jvb:stable
@@ -100,7 +100,7 @@ services:
     depends_on:
       - prosody
     networks:
-      meet.jitsi:
+      jitsi:
 
 volumes:
   jitsi-web-config:
@@ -112,7 +112,7 @@ volumes:
   jitsi-jvb-config:
 
 networks:
-  meet.jitsi:
+  jitsi:
     driver: bridge
   coolify:
     external: true
