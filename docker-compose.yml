@@ -6,6 +6,9 @@ services:
       - jitsi-web-config:/config:Z
       - jitsi-web-crontabs:/var/spool/cron/crontabs:Z
       - jitsi-transcripts:/usr/share/jitsi-meet/transcripts:Z
+      - ./branding/watermark.svg:/usr/share/jitsi-meet/images/watermark.svg:ro
+      - ./branding/title.html:/usr/share/jitsi-meet/title.html:ro
+      - ./branding/apply-branding.sh:/etc/cont-init.d/99-artellico-branding:ro
     environment:
       - PUBLIC_URL=https://meet.artellico.com
       - TZ=Europe/Vienna
