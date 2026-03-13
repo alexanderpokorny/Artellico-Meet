@@ -3,19 +3,17 @@ services:
     image: jitsi/web:stable
     restart: unless-stopped
     volumes:
-      - ${CONFIG:-~/.jitsi-meet-cfg}/web:/config:Z
-      - ${CONFIG:-~/.jitsi-meet-cfg}/web/crontabs:/var/spool/cron/crontabs:Z
-      - ${CONFIG:-~/.jitsi-meet-cfg}/transcripts:/usr/share/jitsi-meet/transcripts:Z
-      - ./custom/interface_config.js:/usr/share/jitsi-meet/interface_config.js:ro
-      - ./custom/custom.css:/usr/share/jitsi-meet/css/custom.css:ro
+      - jitsi-web-config:/config:Z
+      - jitsi-web-crontabs:/var/spool/cron/crontabs:Z
+      - jitsi-transcripts:/usr/share/jitsi-meet/transcripts:Z
     environment:
       - PUBLIC_URL=https://meet.artellico.com
       - TZ=Europe/Vienna
       - ENABLE_LETSENCRYPT=0
-      - ENABLE_AUTH
-      - AUTH_TYPE
-      - ENABLE_GUESTS
-      - ENABLE_LOBBY
+      - ENABLE_AUTH=${ENABLE_AUTH:-1}
+      - AUTH_TYPE=${AUTH_TYPE:-internal}
+      - ENABLE_GUESTS=${ENABLE_GUESTS:-1}
+      - ENABLE_LOBBY=${ENABLE_LOBBY:-1}
     networks:
       meet.jitsi:
       coolify:
@@ -39,8 +37,8 @@ services:
       - '5347'
       - '5280'
     volumes:
-      - ${CONFIG:-~/.jitsi-meet-cfg}/prosody/config:/config:Z
-      - ${CONFIG:-~/.jitsi-meet-cfg}/prosody/prosody-plugins-custom:/prosody-plugins-custom:Z
+      - jitsi-prosody-config:/config:Z
+      - jitsi-prosody-plugins:/prosody-plugins-custom:Z
     environment:
       - AUTH_TYPE=internal
       - ENABLE_AUTH=1
@@ -67,7 +65,7 @@ services:
         limits:
           memory: 512M
     volumes:
-      - ${CONFIG:-~/.jitsi-meet-cfg}/jicofo:/config:Z
+      - jitsi-jicofo-config:/config:Z
     environment:
       - AUTH_TYPE=internal
       - ENABLE_AUTH=1
@@ -90,7 +88,7 @@ services:
     ports:
       - '${JVB_PORT:-10000}:${JVB_PORT:-10000}/udp'
     volumes:
-      - ${CONFIG:-~/.jitsi-meet-cfg}/jvb:/config:Z
+      - jitsi-jvb-config:/config:Z
     environment:
       - JVB_ADVERTISE_IPS=${JVB_ADVERTISE_IPS}
       - JVB_PORT=${JVB_PORT:-10000}
@@ -103,6 +101,15 @@ services:
       - prosody
     networks:
       meet.jitsi:
+
+volumes:
+  jitsi-web-config:
+  jitsi-web-crontabs:
+  jitsi-transcripts:
+  jitsi-prosody-config:
+  jitsi-prosody-plugins:
+  jitsi-jicofo-config:
+  jitsi-jvb-config:
 
 networks:
   meet.jitsi:
