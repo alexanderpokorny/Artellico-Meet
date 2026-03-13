@@ -10,7 +10,6 @@ services:
       - PUBLIC_URL=https://meet.artellico.com
       - TZ=Europe/Vienna
       - ENABLE_LETSENCRYPT=0
-      - ENABLE_WELCOME_PAGE=0
       - ENABLE_AUTH=${ENABLE_AUTH:-1}
       - AUTH_TYPE=${AUTH_TYPE:-internal}
       - ENABLE_GUESTS=${ENABLE_GUESTS:-1}
